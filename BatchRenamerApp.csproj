@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFrameworks>net8.0-windows;net48</TargetFrameworks>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <LangVersion>latest</LangVersion>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Assets\BatchRenamerFX.ico</ApplicationIcon>
+    <AssemblyName>BatchRenamerApp</AssemblyName>
+    <RootNamespace>BatchRenamerApp</RootNamespace>
+    <Version>1.0.0</Version>
+    <Authors>Mohammad Hafiz bin Ismail</Authors>
+    <Company>Mohammad Hafiz bin Ismail</Company>
+    <Product>Batch Renamer FX</Product>
+    <Copyright>Copyright © 2026 Mohammad Hafiz bin Ismail</Copyright>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\BatchRenamerFX.ico" />
+    <Resource Include="Assets\StoreLogo.png" />
+  </ItemGroup>
+
+</Project>

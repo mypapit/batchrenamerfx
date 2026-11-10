@@ -1,0 +1,498 @@
+<Window x:Class="BatchRenamerApp.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:models="clr-namespace:BatchRenamerApp.Models"
+        Title="Batch Renamer FX"
+        Icon="pack://application:,,,/Assets/BatchRenamerFX.ico"
+        Width="980" Height="820"
+        MinWidth="860" MinHeight="700"
+        WindowStartupLocation="CenterScreen"
+        FontFamily="Segoe UI"
+        Background="#F3F3F3">
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Top Application Header Card with Geometric 'BR' Logo & About Button -->
+        <Border Grid.Row="0" Background="#FFFFFF" BorderBrush="#E5E5E5" BorderThickness="1" CornerRadius="8" Padding="14,10" Margin="0,0,0,12">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Geometric Hexagonal Prism Logo with 'BR' Monogram -->
+                <Border Grid.Column="0" Width="42" Height="42" CornerRadius="9" Background="#0F172A" BorderBrush="#334155" BorderThickness="1" Margin="0,0,12,0">
+                    <Grid Width="34" Height="34" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Canvas Width="34" Height="34">
+                            <Polygon Points="17,2 30,9.5 17,17 4,9.5" Fill="#38BDF8"/>
+                            <Polygon Points="4,9.5 17,17 17,32 4,24.5" Fill="#0078D4"/>
+                            <Polygon Points="17,17 30,9.5 30,24.5 17,32" Fill="#005A9E"/>
+                            <Polygon Points="17,7 26,17 17,27 8,17" Fill="#0F172A" Opacity="0.88" Stroke="#FBBF24" StrokeThickness="1.2"/>
+                        </Canvas>
+                        <TextBlock Text="BR"
+                                   FontSize="11.5"
+                                   FontWeight="ExtraBold"
+                                   Foreground="#FFFFFF"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"/>
+                    </Grid>
+                </Border>
+
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock Text="Batch Renamer FX" FontSize="18" FontWeight="SemiBold" Foreground="#1A1A1A"/>
+                    <TextBlock Text="Rule-Based Multi-File Batch Renamer • Copyright © 2026 Mohammad Hafiz bin Ismail • BSD 2-Clause License" FontSize="11.5" Foreground="#5C5C5C"/>
+                </StackPanel>
+
+                <Button Grid.Column="2"
+                        Content="About"
+                        Width="92"
+                        Height="32"
+                        Style="{StaticResource FluentSecondaryButtonStyle}"
+                        Click="AboutButton_Click"/>
+            </Grid>
+        </Border>
+
+        <!-- Main Content Area matching reference-ui.jpg + Microsoft Fluent UI -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="150"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Left Column: Presets, Destination Folder, New Filenames, Source & File Selection -->
+            <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto" Padding="0,0,12,0">
+                <StackPanel>
+
+                    <!-- 1. Presets GroupBox (Matches reference-ui.jpg) -->
+                    <GroupBox Header="Presets">
+                        <Grid Margin="2,2,2,2">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="0" Text="Preset" VerticalAlignment="Center" FontWeight="Normal" FontSize="13" Foreground="#1A1A1A" Margin="0,0,12,0"/>
+
+                            <ComboBox x:Name="PresetComboBox"
+                                      Grid.Column="1"
+                                      Height="30"
+                                      VerticalContentAlignment="Center"
+                                      FontWeight="Normal"
+                                      FontSize="13"
+                                      SelectionChanged="PresetComboBox_SelectionChanged"/>
+
+                            <!-- Save Preset Icon Button -->
+                            <Button Grid.Column="2"
+                                    Width="34" Height="30"
+                                    Margin="8,0,4,0"
+                                    ToolTip="Save Current Configuration as Preset"
+                                    Style="{StaticResource FluentSecondaryButtonStyle}"
+                                    Padding="0"
+                                    Click="SavePresetButton_Click">
+                                <Canvas Width="18" Height="18">
+                                    <!-- Download / Save Tray Icon matching reference-ui.jpg -->
+                                    <Path Data="M9,2 L9,11 M5,7 L9,11 L13,7 M3,13 L3,15 L15,15 L15,13"
+                                          Stroke="#1A1A1A" StrokeThickness="1.7" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                                </Canvas>
+                            </Button>
+
+                            <!-- Delete Preset Trash Icon Button -->
+                            <Button Grid.Column="3"
+                                    Width="34" Height="30"
+                                    ToolTip="Delete Selected Preset"
+                                    Style="{StaticResource FluentSecondaryButtonStyle}"
+                                    Padding="0"
+                                    Click="DeletePresetButton_Click">
+                                <Canvas Width="18" Height="18">
+                                    <!-- Trash Bin Icon matching reference-ui.jpg -->
+                                    <Path Data="M3,5 L15,5 M6,5 L6,3 L12,3 L12,5 M5,5 L6,15 L12,15 L13,5 M8,8 L8,13 M10,8 L10,13"
+                                          Stroke="#1A1A1A" StrokeThickness="1.5" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                                </Canvas>
+                            </Button>
+                        </Grid>
+                    </GroupBox>
+
+                    <!-- 2. Destination Folder GroupBox (Matches reference-ui.jpg) -->
+                    <GroupBox Header="Destination Folder">
+                        <StackPanel Margin="4,2,4,2" TextElement.FontWeight="Normal">
+                            <RadioButton x:Name="RenameSameFolderRadio"
+                                         Content="Rename in Same Folder"
+                                         IsChecked="True"
+                                         Margin="0,2,0,5"
+                                         FontSize="13"
+                                         Foreground="#1A1A1A"
+                                         Checked="DestinationModeRadio_Checked"/>
+                            <RadioButton x:Name="MoveOtherFolderRadio"
+                                         Content="Move to Other Folder"
+                                         Margin="0,0,0,5"
+                                         FontSize="13"
+                                         Foreground="#1A1A1A"
+                                         Checked="DestinationModeRadio_Checked"/>
+                            <RadioButton x:Name="CopyOtherFolderRadio"
+                                         Content="Copy to Other Folder"
+                                         Margin="0,0,0,8"
+                                         FontSize="13"
+                                         Foreground="#1A1A1A"
+                                         Checked="DestinationModeRadio_Checked"/>
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Button x:Name="BrowseDestinationButton"
+                                        Grid.Column="0"
+                                        Content="Browse..."
+                                        Width="95" Height="28"
+                                        Margin="18,0,10,0"
+                                        Style="{StaticResource FluentSecondaryButtonStyle}"
+                                        Click="BrowseDestinationButton_Click"/>
+                                <TextBox x:Name="DestinationFolderTextBox"
+                                         Grid.Column="1"
+                                         Height="28"
+                                         VerticalContentAlignment="Center"
+                                         Padding="6,0"
+                                         FontSize="12.5"
+                                         TextChanged="DestinationFolderTextBox_TextChanged"/>
+                            </Grid>
+                        </StackPanel>
+                    </GroupBox>
+
+                    <!-- 3. New Filenames GroupBox (Max 4 Configurable Parts, Matches reference-ui.jpg) -->
+                    <GroupBox Header="New Filenames">
+                        <StackPanel Margin="2,2,2,2" TextElement.FontWeight="Normal">
+                            <ItemsControl x:Name="RulePartsItemsControl">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type models:RenameRulePart}">
+                                        <Grid Margin="0,0,0,8">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="195"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <!-- Rule Part Type Selector -->
+                                            <ComboBox Grid.Column="0"
+                                                      Height="30"
+                                                      Margin="0,0,10,0"
+                                                      VerticalContentAlignment="Center"
+                                                      SelectedValuePath="Tag"
+                                                      SelectedValue="{Binding PartType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                      SelectionChanged="RulePartControl_Changed">
+                                                <ComboBoxItem Content="Text" Tag="{x:Static models:RulePartType.Text}"/>
+                                                <ComboBoxItem Content="Sequence Number" Tag="{x:Static models:RulePartType.SequenceNumber}"/>
+                                                <ComboBoxItem Content="Sequence Letter" Tag="{x:Static models:RulePartType.SequenceLetter}"/>
+                                                <ComboBoxItem Content="Date" Tag="{x:Static models:RulePartType.Date}"/>
+                                            </ComboBox>
+
+                                            <!-- Dynamic Configuration Area per Part Type -->
+                                            <Grid Grid.Column="1" Margin="0,0,10,0">
+                                                <!-- Option A: Text (Constant String) -->
+                                                <TextBox Height="30"
+                                                         VerticalContentAlignment="Center"
+                                                         Padding="8,0"
+                                                         Visibility="{Binding TextVisibility}"
+                                                         Text="{Binding TextValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                         TextChanged="RulePartText_Changed"/>
+
+                                                <!-- Option B: Sequence Number (Start Number + Total Digits with Zero-Padding) -->
+                                                <Grid Visibility="{Binding SequenceNumberVisibility}">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="140"/>
+                                                        <ColumnDefinition Width="10"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBox Grid.Column="0"
+                                                             Height="30"
+                                                             VerticalContentAlignment="Center"
+                                                             Padding="8,0"
+                                                             ToolTip="Starting Sequence Number"
+                                                             Text="{Binding StartNumberText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                             TextChanged="RulePartText_Changed"/>
+                                                    <ComboBox Grid.Column="2"
+                                                              Height="30"
+                                                              VerticalContentAlignment="Center"
+                                                              ToolTip="Total Digits (Pads with leading 0s)"
+                                                              SelectedValuePath="Tag"
+                                                              SelectedValue="{Binding TotalDigitsTag, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                              SelectionChanged="RulePartControl_Changed">
+                                                        <ComboBoxItem Content="One Digit (1)" Tag="1"/>
+                                                        <ComboBoxItem Content="Two Digits (01)" Tag="2"/>
+                                                        <ComboBoxItem Content="Three Digits (001)" Tag="3"/>
+                                                        <ComboBoxItem Content="Four Digits (0001)" Tag="4"/>
+                                                        <ComboBoxItem Content="Five Digits (00001)" Tag="5"/>
+                                                        <ComboBoxItem Content="Six Digits (000001)" Tag="6"/>
+                                                    </ComboBox>
+                                                </Grid>
+
+                                                <!-- Option C: Sequence Letter -->
+                                                <Grid Visibility="{Binding SequenceLetterVisibility}">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="90"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Grid.Column="0" Text="Start Letter:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                                    <TextBox Grid.Column="1"
+                                                             Height="30"
+                                                             MaxLength="2"
+                                                             VerticalContentAlignment="Center"
+                                                             Padding="8,0"
+                                                             Text="{Binding StartLetter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                             TextChanged="RulePartText_Changed"/>
+                                                    <TextBlock Grid.Column="2" Text="(A, B, C... or a, b, c...)" VerticalAlignment="Center" Foreground="#5C5C5C" Margin="10,0,0,0" FontSize="12"/>
+                                                </Grid>
+
+                                                <!-- Option D: Date (ISO date, MMDDYYYY, YYYYMMDD, YYYYMM, YYYY-MM) -->
+                                                <Grid Visibility="{Binding DateVisibility}">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="175"/>
+                                                        <ColumnDefinition Width="8"/>
+                                                        <ColumnDefinition Width="125"/>
+                                                        <ColumnDefinition Width="8"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <ComboBox Grid.Column="0"
+                                                              Height="30"
+                                                              VerticalContentAlignment="Center"
+                                                              SelectedValuePath="Tag"
+                                                              SelectedValue="{Binding DateFormat, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                              SelectionChanged="RulePartControl_Changed">
+                                                        <ComboBoxItem Content="ISO date (YYYY-MM-DD)" Tag="{x:Static models:DateRuleFormat.ISO_Date}"/>
+                                                        <ComboBoxItem Content="MMDDYYYY" Tag="{x:Static models:DateRuleFormat.MMDDYYYY}"/>
+                                                        <ComboBoxItem Content="YYYYMMDD" Tag="{x:Static models:DateRuleFormat.YYYYMMDD}"/>
+                                                        <ComboBoxItem Content="YYYYMM" Tag="{x:Static models:DateRuleFormat.YYYYMM}"/>
+                                                        <ComboBoxItem Content="YYYY-MM" Tag="{x:Static models:DateRuleFormat.YYYY_MM}"/>
+                                                    </ComboBox>
+                                                    <DatePicker Grid.Column="2"
+                                                                Height="30"
+                                                                VerticalContentAlignment="Center"
+                                                                SelectedDate="{Binding ReferenceDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                                SelectedDateChanged="RulePartDate_Changed"/>
+                                                    <CheckBox Grid.Column="4"
+                                                              Content="File Date"
+                                                              VerticalAlignment="Center"
+                                                              ToolTip="Use each file's Date Modified instead of the fixed date"
+                                                              IsChecked="{Binding UseFileModifiedDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                              Click="RulePartCheckBox_Click"/>
+                                                </Grid>
+                                            </Grid>
+
+                                            <!-- - and + Buttons matching reference-ui.jpg -->
+                                            <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                                                <Button Content="−"
+                                                        Width="30" Height="30"
+                                                        FontSize="15" FontWeight="SemiBold"
+                                                        Margin="0,0,6,0"
+                                                        Style="{StaticResource FluentSecondaryButtonStyle}"
+                                                        ToolTip="Remove this filename part"
+                                                        IsEnabled="{Binding CanRemove}"
+                                                        Tag="{Binding}"
+                                                        Click="RemoveRulePartButton_Click"/>
+                                                <Button Content="+"
+                                                        Width="30" Height="30"
+                                                        FontSize="15" FontWeight="SemiBold"
+                                                        Style="{StaticResource FluentSecondaryButtonStyle}"
+                                                        ToolTip="Add filename part below (Max 4 parts)"
+                                                        IsEnabled="{Binding CanAdd}"
+                                                        Tag="{Binding}"
+                                                        Click="AddRulePartButton_Click"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <!-- Live Rule Sample Banner -->
+                            <Border Background="#E5F1FB" BorderBrush="#B3D7F2" BorderThickness="1" CornerRadius="4" Padding="10,6" Margin="0,4,0,0">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="Live Sample ('IMG_0012.jpg'): " FontWeight="SemiBold" Foreground="#1A1A1A" FontSize="12.5"/>
+                                    <TextBlock x:Name="SampleRuleOutputTextBlock" Text="File_149.jpg" FontWeight="Bold" Foreground="#0067C0" FontSize="12.5"/>
+                                    <TextBlock x:Name="PartsCountTextBlock" Text="  (3 of 4 max parts active)" Foreground="#5C5C5C" FontSize="12"/>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </GroupBox>
+
+                    <!-- 4. Source Folder, File Filtering & Multi-File Selection GroupBox -->
+                    <GroupBox Header="Source Folder, Filters &amp; Multi-File Selection">
+                        <StackPanel Margin="2,2,2,2" TextElement.FontWeight="Normal">
+                            <!-- Folder Selection Bar -->
+                            <Grid Margin="0,0,0,10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Source Folder:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <TextBox x:Name="SourceFolderTextBox"
+                                         Grid.Column="1"
+                                         Height="28"
+                                         VerticalContentAlignment="Center"
+                                         Padding="6,0"
+                                         Margin="0,0,8,0"/>
+                                <Button Grid.Column="2"
+                                        Content="Browse Folder..."
+                                        Width="115" Height="28"
+                                        Margin="0,0,6,0"
+                                        Style="{StaticResource FluentSecondaryButtonStyle}"
+                                        Click="BrowseSourceFolderButton_Click"/>
+                                <Button Grid.Column="3"
+                                        Content="Load Sample List"
+                                        Width="120" Height="28"
+                                        Style="{StaticResource FluentSecondaryButtonStyle}"
+                                        ToolTip="Load sample file entries (including IMG_0012.jpg) to preview and test rules"
+                                        Click="LoadSampleFilesButton_Click"/>
+                            </Grid>
+
+                            <!-- Filter Criteria Panel (Size, Extension, Date Modified, Date Created) -->
+                            <Border Background="#F9F9F9" BorderBrush="#E5E5E5" BorderThickness="1" CornerRadius="6" Padding="10,8" Margin="0,0,0,10">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="8"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Row 0: Extension & Size Filters -->
+                                    <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal">
+                                        <TextBlock Text="Extension:" VerticalAlignment="Center" Width="68" FontSize="12"/>
+                                        <TextBox x:Name="FilterExtensionTextBox" Width="120" Height="25" VerticalContentAlignment="Center" Padding="4,0" ToolTip="e.g. .jpg, .png (leave blank for all)" TextChanged="FilterCriteria_Changed"/>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
+                                        <TextBlock Text="Size (KB):" VerticalAlignment="Center" Width="65" FontSize="12"/>
+                                        <TextBox x:Name="FilterMinSizeTextBox" Width="65" Height="25" VerticalContentAlignment="Center" Padding="4,0" ToolTip="Min KB" TextChanged="FilterCriteria_Changed"/>
+                                        <TextBlock Text=" to " VerticalAlignment="Center" FontSize="12"/>
+                                        <TextBox x:Name="FilterMaxSizeTextBox" Width="65" Height="25" VerticalContentAlignment="Center" Padding="4,0" ToolTip="Max KB" TextChanged="FilterCriteria_Changed"/>
+                                    </StackPanel>
+
+                                    <Button Grid.Row="0" Grid.Column="2"
+                                            Content="Clear Filters"
+                                            Width="96" Height="26"
+                                            FontSize="12"
+                                            Style="{StaticResource FluentSecondaryButtonStyle}"
+                                            Click="ClearFiltersButton_Click"/>
+
+                                    <!-- Row 2: Date Modified & Date Created Filters -->
+                                    <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal">
+                                        <TextBlock Text="Modified:" VerticalAlignment="Center" Width="68" FontSize="12"/>
+                                        <DatePicker x:Name="FilterModifiedFromPicker" Width="102" Height="25" SelectedDateChanged="FilterDate_Changed"/>
+                                        <TextBlock Text="–" VerticalAlignment="Center" Margin="3,0"/>
+                                        <DatePicker x:Name="FilterModifiedToPicker" Width="102" Height="25" SelectedDateChanged="FilterDate_Changed"/>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Orientation="Horizontal">
+                                        <TextBlock Text="Created:" VerticalAlignment="Center" Width="65" FontSize="12"/>
+                                        <DatePicker x:Name="FilterCreatedFromPicker" Width="102" Height="25" SelectedDateChanged="FilterDate_Changed"/>
+                                        <TextBlock Text="–" VerticalAlignment="Center" Margin="3,0"/>
+                                        <DatePicker x:Name="FilterCreatedToPicker" Width="102" Height="25" SelectedDateChanged="FilterDate_Changed"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+
+                            <!-- Multi-File Selection Toolbar -->
+                            <DockPanel Margin="0,0,0,6">
+                                <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
+                                    <Button Content="Select All" Width="82" Height="26" FontSize="12" Margin="0,0,6,0" Style="{StaticResource FluentSecondaryButtonStyle}" Click="SelectAllFilesButton_Click"/>
+                                    <Button Content="Select None" Width="88" Height="26" FontSize="12" Margin="0,0,6,0" Style="{StaticResource FluentSecondaryButtonStyle}" Click="SelectNoneFilesButton_Click"/>
+                                    <Button Content="Invert Selection" Width="108" Height="26" FontSize="12" Style="{StaticResource FluentSecondaryButtonStyle}" Click="InvertSelectionButton_Click"/>
+                                </StackPanel>
+                                <TextBlock x:Name="FileCountStatusTextBlock"
+                                           DockPanel.Dock="Right"
+                                           HorizontalAlignment="Right"
+                                           VerticalAlignment="Center"
+                                           FontSize="12"
+                                           Foreground="#5C5C5C"
+                                           Text="0 files selected"/>
+                            </DockPanel>
+
+                            <!-- Files & Inline Preview DataGrid -->
+                            <DataGrid x:Name="FilesDataGrid"
+                                      Height="195"
+                                      AutoGenerateColumns="False"
+                                      CanUserAddRows="False"
+                                      CanUserDeleteRows="False"
+                                      SelectionMode="Extended"
+                                      HeadersVisibility="Column"
+                                      GridLinesVisibility="Horizontal"
+                                      HorizontalGridLinesBrush="#ECECEC"
+                                      RowBackground="White"
+                                      AlternatingRowBackground="#F9F9F9"
+                                      BorderBrush="#E5E5E5"
+                                      BorderThickness="1"
+                                      FontSize="12">
+                                <DataGrid.Columns>
+                                    <DataGridCheckBoxColumn Header="✓" Binding="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}" Width="35"/>
+                                    <DataGridTextColumn Header="Original Filename" Binding="{Binding OriginalFileName}" IsReadOnly="True" Width="155"/>
+                                    <DataGridTextColumn Header="New Filename (Preview)" Binding="{Binding PreviewNewFileName}" IsReadOnly="True" Width="185">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="FontWeight" Value="SemiBold"/>
+                                                <Setter Property="Foreground" Value="#0067C0"/>
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="Ext" Binding="{Binding Extension}" IsReadOnly="True" Width="55"/>
+                                    <DataGridTextColumn Header="Size" Binding="{Binding SizeFormatted}" IsReadOnly="True" Width="70"/>
+                                    <DataGridTextColumn Header="Modified" Binding="{Binding DateModified, StringFormat=yyyy-MM-dd}" IsReadOnly="True" Width="85"/>
+                                    <DataGridTextColumn Header="Created" Binding="{Binding DateCreated, StringFormat=yyyy-MM-dd}" IsReadOnly="True" Width="85"/>
+                                    <DataGridTextColumn Header="Status" Binding="{Binding Status}" IsReadOnly="True" Width="*"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </StackPanel>
+                    </GroupBox>
+
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- Right Column: Rename, Cancel, Preview Buttons (Matches reference-ui.jpg with Fluent UI styling) -->
+            <StackPanel Grid.Column="1" VerticalAlignment="Top" Margin="4,4,0,0">
+                <Button x:Name="RenameButton"
+                        Content="Rename"
+                        Height="34"
+                        Margin="0,0,0,10"
+                        Style="{StaticResource FluentPrimaryButtonStyle}"
+                        ToolTip="Execute batch rename (asks for confirmation before applying changes)"
+                        Click="RenameButton_Click"/>
+
+                <Button x:Name="CancelButton"
+                        Content="Cancel"
+                        Height="34"
+                        Margin="0,0,0,12"
+                        Style="{StaticResource FluentSecondaryButtonStyle}"
+                        ToolTip="Close or cancel pending batch rename"
+                        Click="CancelButton_Click"/>
+
+                <Button x:Name="PreviewButton"
+                        Content="Preview"
+                        Height="34"
+                        Margin="0,0,0,18"
+                        Style="{StaticResource FluentSecondaryButtonStyle}"
+                        ToolTip="Open the dedicated Preview Window to inspect all filename changes before applying"
+                        Click="PreviewButton_Click"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- Bottom Status Bar -->
+        <Border Grid.Row="2" Background="#FFFFFF" BorderBrush="#E5E5E5" BorderThickness="1" CornerRadius="6" Padding="12,6" Margin="0,8,0,0">
+            <DockPanel>
+                <TextBlock x:Name="StatusBarTextBlock" Text="Ready. Configure rules and click 'Preview' to inspect changes before applying." FontSize="12" Foreground="#1A1A1A"/>
+                <TextBlock Text="Copyright © 2026 Mohammad Hafiz bin Ismail • BSD 2-Clause License" DockPanel.Dock="Right" HorizontalAlignment="Right" FontSize="11.5" Foreground="#5C5C5C"/>
+            </DockPanel>
+        </Border>
+    </Grid>
+</Window>
