@@ -6,13 +6,13 @@
   IgnorableNamespaces="uap rescap">
 
   <Identity
-    Name="MohammadHafizBinIsmail.BatchRenamerFX"
-    Publisher="CN=Mohammad Hafiz bin Ismail"
+    Name="mypapit.BatchRenamerFX"
+    Publisher="CN=73017795-2DB9-4D31-ACE3-85459206A4C8"
     Version="1.0.0.0" />
 
   <Properties>
     <DisplayName>Batch Renamer FX</DisplayName>
-    <PublisherDisplayName>Mohammad Hafiz bin Ismail</PublisherDisplayName>
+    <PublisherDisplayName>mypapit</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
     <Description>Windows Store compatible batch file renaming tool (Batch Renamer FX) with rule builder, file filtering, and live preview.</Description>
   </Properties>
