@@ -1,0 +1,2 @@
+c:\xampp74\htdocs\batchrenamer\publish\win-x64\BatchRenamerApp.pdb
+c:\xampp74\htdocs\batchrenamer\publish\win-x64\BatchRenamerApp.exe

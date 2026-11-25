@@ -43,7 +43,7 @@
 
                 <StackPanel VerticalAlignment="Center">
                     <TextBlock Text="Batch Renamer FX" FontSize="22" FontWeight="SemiBold" Foreground="#1A1A1A"/>
-                    <TextBlock Text="Version 1.0.0 • .NET &amp; Windows Store Compatible" FontSize="12.5" Foreground="#5C5C5C" Margin="0,3,0,0"/>
+                    <TextBlock Text="Version 1.0.1.0 • .NET &amp; Windows Store Compatible" FontSize="12.5" Foreground="#5C5C5C" Margin="0,3,0,0"/>
                     <Border Background="#E5F1FB" BorderBrush="#B3D7F2" BorderThickness="1" CornerRadius="4" Padding="8,2" HorizontalAlignment="Left" Margin="0,6,0,0">
                         <TextBlock Text="Microsoft Fluent UI • MSIX Ready" FontSize="11" FontWeight="SemiBold" Foreground="#0067C0"/>
                     </Border>

@@ -81,9 +81,41 @@ namespace BatchRenamerApp
 
                 // 3. Test Default preset configuration: "File" + "_" + SequenceNumber(149, 3 digits) -> "File_149.jpg"
                 var defaultPresets = RenamePreset.GetBuiltInPresets();
+                if (RenameEngine.MaxRuleParts != 8)
+                    throw new Exception($"MaxRuleParts check failed: expected 8, got {RenameEngine.MaxRuleParts}");
+                if (defaultPresets[0].Parts.Count != 3)
+                    throw new Exception($"Default preset parts count failed: expected 3, got {defaultPresets[0].Parts.Count}");
+                foreach (var preset in defaultPresets)
+                {
+                    if (preset.Name.StartsWith("Sample ", StringComparison.OrdinalIgnoreCase) ||
+                        preset.Name.StartsWith("Preset ", StringComparison.OrdinalIgnoreCase))
+                    {
+                        throw new Exception($"Preset name contains unwanted prefix: '{preset.Name}'");
+                    }
+                }
                 string res3 = RenameEngine.GenerateNewFileName("IMG_0012.jpg", defaultPresets[0].Parts, 0);
                 if (res3 != "File_149.jpg")
                     throw new Exception($"Default preset failed: expected 'File_149.jpg', got '{res3}'");
+
+                // 3b. Test 8-part filename generation and 9-part capping
+                var nineParts = new List<RenameRulePart>
+                {
+                    new RenameRulePart { PartType = RulePartType.Text, TextValue = "p1-" },
+                    new RenameRulePart { PartType = RulePartType.Text, TextValue = "p2-" },
+                    new RenameRulePart { PartType = RulePartType.Text, TextValue = "p3-" },
+                    new RenameRulePart { PartType = RulePartType.Text, TextValue = "p4-" },
+                    new RenameRulePart { PartType = RulePartType.Text, TextValue = "p5-" },
+                    new RenameRulePart { PartType = RulePartType.Text, TextValue = "p6-" },
+                    new RenameRulePart { PartType = RulePartType.Text, TextValue = "p7-" },
+                    new RenameRulePart { PartType = RulePartType.SequenceNumber, StartNumber = 8, TotalDigits = 2 },
+                    new RenameRulePart { PartType = RulePartType.Text, TextValue = "-EXTRA" }
+                };
+                string resEight = RenameEngine.GenerateNewFileName("IMG_0012.jpg", nineParts.Take(8).ToList(), 0);
+                if (resEight != "p1-p2-p3-p4-p5-p6-p7-08.jpg")
+                    throw new Exception($"8-part generation failed: expected 'p1-p2-p3-p4-p5-p6-p7-08.jpg', got '{resEight}'");
+                string resNineCapped = RenameEngine.GenerateNewFileName("IMG_0012.jpg", nineParts, 0);
+                if (resNineCapped != "p1-p2-p3-p4-p5-p6-p7-08.jpg")
+                    throw new Exception($"9-part capping failed: expected 'p1-p2-p3-p4-p5-p6-p7-08.jpg', got '{resNineCapped}'");
 
                 // 4. Test Sequence Letter & all 5 Date Formats (ISO date, MMDDYYYY, YYYYMMDD, YYYYMM, YYYY-MM)
                 DateTime testDate = new DateTime(2026, 11, 8);

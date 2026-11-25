@@ -69,7 +69,7 @@ namespace BatchRenamerApp.Models
                 // Matches AGENTS.md Sample 1: "text/text/sequence number" -> "photo-" "0001".jpg
                 new RenamePreset
                 {
-                    Name = "Sample 1: Photo Sequence (photo-0001)",
+                    Name = "Photo Sequence (photo-0001)",
                     DestinationMode = DestinationOperationMode.RenameInSameFolder,
                     Parts = new List<RenameRulePart>
                     {
@@ -81,7 +81,7 @@ namespace BatchRenamerApp.Models
                 // Matches AGENTS.md Sample 2: "text/sequence number/text/date" -> "Mark-" "001" "-" "2026-11-08".jpg
                 new RenamePreset
                 {
-                    Name = "Sample 2: Dated Mark (Mark-001-2026-11-08)",
+                    Name = "Dated Mark (Mark-001-2026-11-08)",
                     DestinationMode = DestinationOperationMode.RenameInSameFolder,
                     Parts = new List<RenameRulePart>
                     {
@@ -100,7 +100,7 @@ namespace BatchRenamerApp.Models
                 // Demonstrates Sequence Letter rule
                 new RenamePreset
                 {
-                    Name = "Sample 3: Appendix Letter (Doc-A-202611)",
+                    Name = "Appendix Letter (Doc-A-202611)",
                     DestinationMode = DestinationOperationMode.RenameInSameFolder,
                     Parts = new List<RenameRulePart>
                     {

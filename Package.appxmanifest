@@ -8,7 +8,8 @@
   <Identity
     Name="mypapit.BatchRenamerFX"
     Publisher="CN=73017795-2DB9-4D31-ACE3-85459206A4C8"
-    Version="1.0.0.0" />
+    Version="1.0.1.0"
+    ProcessorArchitecture="x64" />
 
   <Properties>
     <DisplayName>Batch Renamer FX</DisplayName>
@@ -33,8 +34,8 @@
         DisplayName="Batch Renamer FX"
         Description="Batch rename hundreds or thousands of files with configurable rules and preview."
         BackgroundColor="transparent"
-        Square150x150Logo="Assets\StoreLogo.png"
-        Square44x44Logo="Assets\StoreLogo.png">
+        Square150x150Logo="Assets\Square150x150Logo.png"
+        Square44x44Logo="Assets\Square44x44Logo.png">
       </uap:VisualElements>
     </Application>
   </Applications>

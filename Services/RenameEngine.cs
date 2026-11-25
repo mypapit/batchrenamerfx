@@ -38,7 +38,7 @@ namespace BatchRenamerApp.Services
 {
     public static class RenameEngine
     {
-        public const int MaxRuleParts = 4;
+        public const int MaxRuleParts = 8;
 
         /// <summary>
         /// Generates the new filename for a single file at a given 0-based sequence index.

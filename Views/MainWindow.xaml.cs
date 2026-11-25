@@ -58,7 +58,15 @@ namespace BatchRenamerApp.Views
             FilesDataGrid.ItemsSource = _filteredFiles;
 
             InitializePresets();
-            LoadSampleFilesInternal();
+            if (_presets.Count > 0)
+            {
+                ApplyPreset(_presets[0]);
+            }
+            UpdateDestinationUiVisibility();
+            if (DestinationFolderExpander != null)
+            {
+                DestinationFolderExpander.IsExpanded = false;
+            }
             RefreshPreviews();
         }
 
@@ -128,6 +136,11 @@ namespace BatchRenamerApp.Views
             }
 
             UpdateRulePartButtonsState();
+            UpdateDestinationUiVisibility();
+            if (DestinationFolderExpander != null && preset.DestinationMode != DestinationOperationMode.RenameInSameFolder)
+            {
+                DestinationFolderExpander.IsExpanded = true;
+            }
             _isLoadingPreset = false;
             RefreshPreviews();
         }
@@ -170,7 +183,7 @@ namespace BatchRenamerApp.Views
 
             if (PartsCountTextBlock != null)
             {
-                PartsCountTextBlock.Text = $"  ({_activeRuleParts.Count} of {RenameEngine.MaxRuleParts} max parts active)";
+                PartsCountTextBlock.Text = $"{_activeRuleParts.Count} of {RenameEngine.MaxRuleParts} max parts active";
             }
         }
 
@@ -183,14 +196,28 @@ namespace BatchRenamerApp.Views
             return DestinationOperationMode.RenameInSameFolder;
         }
 
-        private void RefreshPreviews()
+        private void UpdateDestinationUiVisibility()
         {
-            if (_activeRuleParts == null || SampleRuleOutputTextBlock == null)
+            if (DestinationPathGrid == null || DestinationModeSummaryText == null)
                 return;
 
-            // Update live sample banner for 'IMG_0012.jpg'
-            string sampleResult = RenameEngine.GenerateNewFileName("IMG_0012.jpg", _activeRuleParts, 0, new DateTime(2026, 11, 8));
-            SampleRuleOutputTextBlock.Text = sampleResult;
+            DestinationOperationMode mode = GetSelectedDestinationMode();
+            DestinationPathGrid.Visibility = mode == DestinationOperationMode.RenameInSameFolder
+                ? Visibility.Collapsed
+                : Visibility.Visible;
+
+            DestinationModeSummaryText.Text = mode switch
+            {
+                DestinationOperationMode.MoveToOtherFolder => "Move to Other Folder",
+                DestinationOperationMode.CopyToOtherFolder => "Copy to Other Folder",
+                _ => "Rename in Same Folder"
+            };
+        }
+
+        private void RefreshPreviews()
+        {
+            if (_activeRuleParts == null)
+                return;
 
             // Update all filtered files
             RenameEngine.UpdatePreviews(
@@ -204,86 +231,6 @@ namespace BatchRenamerApp.Views
                 int selectedCount = _filteredFiles.Count(f => f.IsSelected);
                 FileCountStatusTextBlock.Text = $"{selectedCount} of {_filteredFiles.Count} filtered file(s) selected ({_allFolderFiles.Count} total in folder)";
             }
-        }
-
-        private void LoadSampleFilesInternal()
-        {
-            _allFolderFiles.Clear();
-
-            var sampleItems = new[]
-            {
-                new FileItemModel
-                {
-                    IsSelected = true,
-                    OriginalFileName = "IMG_0012.jpg",
-                    FullPath = @"C:\SamplePhotos\IMG_0012.jpg",
-                    Extension = ".jpg",
-                    SizeBytes = 1450 * 1024,
-                    DateCreated = new DateTime(2026, 11, 1, 9, 15, 0),
-                    DateModified = new DateTime(2026, 11, 8, 14, 30, 0)
-                },
-                new FileItemModel
-                {
-                    IsSelected = true,
-                    OriginalFileName = "IMG_0013.jpg",
-                    FullPath = @"C:\SamplePhotos\IMG_0013.jpg",
-                    Extension = ".jpg",
-                    SizeBytes = 1820 * 1024,
-                    DateCreated = new DateTime(2026, 11, 2, 10, 20, 0),
-                    DateModified = new DateTime(2026, 11, 8, 15, 10, 0)
-                },
-                new FileItemModel
-                {
-                    IsSelected = true,
-                    OriginalFileName = "IMG_0014.jpg",
-                    FullPath = @"C:\SamplePhotos\IMG_0014.jpg",
-                    Extension = ".jpg",
-                    SizeBytes = 920 * 1024,
-                    DateCreated = new DateTime(2026, 11, 3, 11, 45, 0),
-                    DateModified = new DateTime(2026, 11, 8, 16, 00, 0)
-                },
-                new FileItemModel
-                {
-                    IsSelected = true,
-                    OriginalFileName = "DSC_0205.png",
-                    FullPath = @"C:\SamplePhotos\DSC_0205.png",
-                    Extension = ".png",
-                    SizeBytes = 3200 * 1024,
-                    DateCreated = new DateTime(2026, 11, 5, 8, 00, 0),
-                    DateModified = new DateTime(2026, 11, 9, 8, 30, 0)
-                },
-                new FileItemModel
-                {
-                    IsSelected = true,
-                    OriginalFileName = "vacation_clip.mp4",
-                    FullPath = @"C:\SamplePhotos\vacation_clip.mp4",
-                    Extension = ".mp4",
-                    SizeBytes = 12400 * 1024,
-                    DateCreated = new DateTime(2026, 10, 25, 18, 00, 0),
-                    DateModified = new DateTime(2026, 10, 26, 12, 00, 0)
-                }
-            };
-
-            foreach (var item in sampleItems)
-            {
-                item.PropertyChanged += OnFileItemPropertyChanged;
-                _allFolderFiles.Add(item);
-            }
-
-            if (SourceFolderTextBox != null)
-            {
-                SourceFolderTextBox.Text = "(Sample Demonstration List — Click 'Browse Folder...' to load a real folder)";
-            }
-
-            if (_presets.Count > 0 && _activeRuleParts.Count == 0)
-            {
-                ApplyPreset(_presets[0]);
-                // Show "Default (Modified)" initially as shown in reference-ui.jpg
-                _isPresetModified = true;
-                RefreshPresetComboBox(0);
-            }
-
-            ApplyCurrentFilters();
         }
 
         private void OnFileItemPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -451,6 +398,8 @@ namespace BatchRenamerApp.Views
 
         private void DestinationModeRadio_Checked(object sender, RoutedEventArgs e)
         {
+            UpdateDestinationUiVisibility();
+
             if (_isLoadingPreset)
                 return;
 
@@ -489,7 +438,7 @@ namespace BatchRenamerApp.Views
         {
             if (_activeRuleParts.Count >= RenameEngine.MaxRuleParts)
             {
-                FluentDialogWindow.ShowInfo(this, "Maximum Parts Reached", "A maximum of 4 configurable filename rule parts is allowed.");
+                FluentDialogWindow.ShowInfo(this, "Maximum Parts Reached", $"A maximum of {RenameEngine.MaxRuleParts} configurable filename rule parts is allowed.");
                 return;
             }
 
@@ -576,12 +525,6 @@ namespace BatchRenamerApp.Views
                     LoadFilesFromDirectory(dialog.SelectedPath);
                 }
             }
-        }
-
-        private void LoadSampleFilesButton_Click(object sender, RoutedEventArgs e)
-        {
-            LoadSampleFilesInternal();
-            StatusBarTextBlock.Text = "Loaded sample demonstration files (including IMG_0012.jpg).";
         }
 
         private void FilterCriteria_Changed(object sender, TextChangedEventArgs e)
@@ -691,27 +634,6 @@ namespace BatchRenamerApp.Views
             if (!permitted)
             {
                 StatusBarTextBlock.Text = "Batch rename cancelled by user.";
-                return;
-            }
-
-            // Check if currently loaded items are virtual sample items
-            bool isVirtualDemo = selected.All(f => !File.Exists(f.FullPath));
-            if (isVirtualDemo)
-            {
-                foreach (var f in selected)
-                {
-                    f.OriginalFileName = f.PreviewNewFileName;
-                    f.Status = mode == DestinationOperationMode.CopyToOtherFolder
-                        ? "Copied & Renamed (Sample Mode)"
-                        : "Renamed (Sample Mode)";
-                }
-                RefreshPreviews();
-                StatusBarTextBlock.Text = $"Applied batch rename to {selected.Count} sample file(s).";
-                FluentDialogWindow.ShowInfo(
-                    this,
-                    "Batch Rename Complete",
-                    $"Successfully applied batch rename rules to {selected.Count} sample entry/entries. Use 'Browse Folder...' to run on a folder on disk.",
-                    "Close");
                 return;
             }
 
